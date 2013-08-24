@@ -6,21 +6,26 @@ unix {
     freealut \
     opencv
 }
+include(juce.pri)
 TEMPLATE = app
 CONFIG += console
 CONFIG -= app_bundle
 CONFIG -= qt
 
-SOURCES += main.cpp \
-    audioStream/ogg_stream.cpp \
-    audioStream/mysndfileio.cpp \
-    audioStream/oggdecoder.cpp
+SOURCES += Source/main.cpp \
+    Source/audioStream/ogg_stream.cpp \
+    Source/audioStream/mysndfileio.cpp \
+    Source/audioStream/oggdecoder.cpp \
+    Source/audioStream/midifile.cpp \
+    Source/audioStream/midi_stream.cpp
 
 HEADERS += \
-    audioStream/ogg_stream.h \
-    audioStream/debugHeader.h \
-    audioStream/mysndfileio.h \
-    audioStream/oggdecoder.h
+    Source/audioStream/ogg_stream.h \
+    Source/debugHeader.h \
+    Source/audioStream/mysndfileio.h \
+    Source/audioStream/oggdecoder.h \
+    Source/audioStream/midifile.h \
+    Source/audioStream/midi_stream.h
 
 LIBS += -lvorbis -lvorbisfile -lvorbisenc -laubioext
 
