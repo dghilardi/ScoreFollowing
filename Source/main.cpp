@@ -6,8 +6,10 @@
 
 #include "audioStream/ogg_stream.h"
 #include "audioStream/mysndfileio.h"
-#include "audioStream/oggdecoder.h"
-#include "audioStream/midi_stream.h"
+#include "audioStream/pcmStream/oggdecoder.h"
+#include "audioStream/pitchStream/midi_stream.h"
+#include "audioStream/pitchStream/pitchdetect.h"
+#include "dtw.h"
 
 using namespace std;
 
@@ -60,7 +62,20 @@ int main(int argc, char* argv[])
 }
 
 void pitchDetect(string inputName){
-    uint channelNumber = 0;
+    OggDecoder decoder(inputName);
+    OggDecoder decoder2("../jpaganini24.ogg");
+    PitchDetect extractedPitch(decoder2);
+    //PitchDetect extractedPitch2(decoder2);
+
+    //extractedPitch.showNotes();
+    //extractedPitch2.showNotes();
+
+    Midi_Stream mid("../paganini-24.midi");
+    //mid.showNotes();
+    cout << "midi size: " << mid.getLength() << " pitched size: " << extractedPitch.getLength() << endl;
+    DTW dtw(mid, extractedPitch);
+
+    /*uint channelNumber = 0;
     OggDecoder decoder(inputName, &channelNumber);
     aubio_pitchdetection_t * pitchDetObj = new_aubio_pitchdetection(1024,1,channelNumber, decoder.getSampleRate(), aubio_pitch_yinfft, aubio_pitchm_midi);
     char name[] = "../prova2.mid";
@@ -100,5 +115,5 @@ void pitchDetect(string inputName){
         ++it) {
         OggStream* stream = (*it).second;
         delete stream;
-    }
+    }*/
 }

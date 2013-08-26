@@ -1,4 +1,4 @@
-#include "audioStream/mysndfileio.h"
+#include "mysndfileio.h"
 
 SndFileIO::SndFileIO(string filename){
     file = new_aubio_sndfile_ro(filename.c_str());

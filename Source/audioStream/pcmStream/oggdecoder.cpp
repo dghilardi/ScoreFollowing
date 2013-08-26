@@ -107,7 +107,7 @@ void OggDecoder::read_headers(istream& stream, ogg_sync_state* state) {
   }
 }
 
-OggDecoder::OggDecoder(string filename, unsigned int *channels): mGranulepos(0), is(filename.c_str(), ios::in | ios::binary), audio(0){
+OggDecoder::OggDecoder(string filename): mGranulepos(0), is(filename.c_str(), ios::in | ios::binary), audio(0){
     int ret = ogg_sync_init(&state);
     assert(ret==0);
 
@@ -117,7 +117,6 @@ OggDecoder::OggDecoder(string filename, unsigned int *channels): mGranulepos(0),
         OggStream *stream = (*it).second;
         if(stream->mType == TYPE_VORBIS){
             audio = stream;
-            *channels = (unsigned int) stream->mVorbis.mInfo.channels;
             audio->mVorbis.initForData(audio);
         }else{
             stream->mActive = false;
@@ -131,6 +130,10 @@ int OggDecoder::getSampleRate(){
 }
 
 OggDecoder::~OggDecoder(){
+    for(StreamMap::iterator it = mStreams.begin(); it != mStreams.end(); ++it) {
+        OggStream* stream = (*it).second;
+        delete stream;
+    }
     int ret = ogg_sync_clear(&state);
     assert(ret == 0);
     is.close();
@@ -153,6 +156,10 @@ bool OggDecoder::readSingleFrame(float ***data, uint *samples){
         return true;
     }
     return false;
+}
+
+int OggDecoder::getChannelNumber(){
+    return audio->mVorbis.mInfo.channels;
 }
 
 void OggDecoder::play(istream& is) {

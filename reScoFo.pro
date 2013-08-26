@@ -15,17 +15,28 @@ CONFIG -= qt
 SOURCES += Source/main.cpp \
     Source/audioStream/ogg_stream.cpp \
     Source/audioStream/mysndfileio.cpp \
-    Source/audioStream/oggdecoder.cpp \
+    Source/audioStream/pcmStream/oggdecoder.cpp \
     Source/audioStream/midifile.cpp \
-    Source/audioStream/midi_stream.cpp
+    Source/audioStream/pitchStream/midi_stream.cpp \
+#    Source/audioStream/pitchStream/pitchstream.cpp \
+    Source/audioStream/pcmStream/pcmstream.cpp \
+    Source/audioStream/pitchStream/pitchdetect.cpp \
+    Source/dtw.cpp \
+    Source/Utils/printutils.cpp
 
 HEADERS += \
     Source/audioStream/ogg_stream.h \
     Source/debugHeader.h \
     Source/audioStream/mysndfileio.h \
-    Source/audioStream/oggdecoder.h \
+    Source/audioStream/pcmStream/oggdecoder.h \
     Source/audioStream/midifile.h \
-    Source/audioStream/midi_stream.h
+    Source/audioStream/pitchStream/midi_stream.h \
+    Source/audioStream/pitchStream/pitchstream.h \
+    Source/audioStream/pcmStream/pcmstream.h \
+    Source/audioStream/pitchStream/pitchdetect.h \
+    Source/dtw.h \
+    Source/Utils/printutils.h \
+    Source/settings.h
 
 LIBS += -lvorbis -lvorbisfile -lvorbisenc -laubioext
 

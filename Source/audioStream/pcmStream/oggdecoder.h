@@ -1,7 +1,7 @@
 #ifndef OGGDECODER_H
 #define OGGDECODER_H
 
-#include "../debugHeader.h"
+#include "../../debugHeader.h"
 #include <cmath>
 #include <map>
 #include <iostream>
@@ -10,6 +10,8 @@
 #include <theora/theora.h>
 #include <theora/theoradec.h>
 #include <vorbis/codec.h>
+
+#include "pcmstream.h"
 
 //#include <SDL/SDL.h>
 /*
@@ -94,7 +96,7 @@ public:
 
 typedef map<int, OggStream*> StreamMap;
 
-class OggDecoder
+class OggDecoder : public PCMStream
 {
 public:
   StreamMap mStreams;
@@ -115,11 +117,12 @@ private:
   void handle_theora_data(OggStream* stream, ogg_packet* packet);
 
 public:
-  OggDecoder(string filename, unsigned int *channels);
+  OggDecoder(string filename);
   ~OggDecoder();
 
   void play(istream& stream);
   bool readSingleFrame(float ***data, uint *samples);
+  int getChannelNumber();
   int getSampleRate();
 };
 
