@@ -6,6 +6,8 @@
 #include <string>
 #include "../../../JuceLibraryCode/JuceHeader.h"
 
+#include "../../dtw.h"
+
 #include "../../Utils/printutils.h"
 
 #include "../../debugHeader.h"
@@ -28,6 +30,7 @@ public:
     int getLength();
 
     void showNotes();
+    void adaptMidi(string outputName, const DTW timeWarping);
 };
 
 #endif // MIDI_STREAM_H

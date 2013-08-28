@@ -10,6 +10,8 @@
 #include "audioStream/pitchStream/midi_stream.h"
 #include "audioStream/pitchStream/pitchdetect.h"
 #include "dtw.h"
+#include "odtw.h"
+#include "Utils/printutils.h"
 
 using namespace std;
 
@@ -63,18 +65,33 @@ int main(int argc, char* argv[])
 
 void pitchDetect(string inputName){
     OggDecoder decoder(inputName);
-    OggDecoder decoder2("../jpaganini24.ogg");
-    PitchDetect extractedPitch(decoder2);
-    //PitchDetect extractedPitch2(decoder2);
+    OggDecoder decoder2("../paganini24.ogg");
+    PitchDetect extractedPitch(decoder);
+    PitchDetect extractedPitch2(decoder2);
 
     //extractedPitch.showNotes();
     //extractedPitch2.showNotes();
 
     Midi_Stream mid("../paganini-24.midi");
     //mid.showNotes();
+    cout << "rate: " <<decoder.audio->mVorbis.mInfo.rate << endl;
     cout << "midi size: " << mid.getLength() << " pitched size: " << extractedPitch.getLength() << endl;
-    DTW dtw(mid, extractedPitch);
-
+    //DTW dtw(mid, extractedPitch);
+    double time=0;
+    vector<int> input;
+    ODTW odtw(extractedPitch, 500, 3);
+    while(time<extractedPitch2.getLength()){
+        PrintUtils::printPercentage(time, extractedPitch2.getLength());
+        input.clear();
+        for(int i=1; i<10; ++i){
+            if(time>=extractedPitch2.getLength()) break;
+            input.push_back(extractedPitch2.getPitch(time));
+            time+=1;
+            //cout << extractedPitch.getPitch(time) << endl;
+        }
+        odtw.onlineTimeWarping(input);
+    }
+    odtw.showMatrix();
     /*uint channelNumber = 0;
     OggDecoder decoder(inputName, &channelNumber);
     aubio_pitchdetection_t * pitchDetObj = new_aubio_pitchdetection(1024,1,channelNumber, decoder.getSampleRate(), aubio_pitch_yinfft, aubio_pitchm_midi);

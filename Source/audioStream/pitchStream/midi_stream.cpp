@@ -62,6 +62,10 @@ int Midi_Stream::getLength(){
     return length;
 }
 
+void Midi_Stream::adaptMidi(string outputName, const DTW timeWarping){
+
+}
+
 void Midi_Stream::showNotes(){
 #ifdef USE_OPENCV
     const int hconst = 4, width = 1366;

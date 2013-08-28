@@ -23,23 +23,24 @@ void DTW::computeDinamicTimeWarping(PitchStream &track, SinglePitchStream &input
 
     long long int max=0;
 
+    const float K = 2.0;
     for(int i=1; i<inputSize; ++i){ PrintUtils::printPercentage(i,inputSize); for(int j=1; j<trackSize; ++j){
             int cost = track.getDistance(input.getPitch(i), j);
-            long long int min = dtw[i-1][j];
-            min = myIsMin(min,dtw[i][j-1]) ? min : dtw[i][j-1];
-            min = myIsMin(min, dtw[i-1][j-1]) ? min : dtw[i-1][j-1];
+            long long int min = myAdd(dtw[i-1][j], cost);
+            min = myIsMin(min, myAdd(dtw[i][j-1], cost)) ? min : myAdd(dtw[i][j-1], cost);
+            min = myIsMin(min, myAdd(dtw[i-1][j-1], K*cost)) ? min : myAdd(dtw[i-1][j-1], K*cost);
             assert(cost>=0);
             assert(min>=0);
-            dtw[i][j] = cost+min;
+            dtw[i][j] = min;
             max = dtw[i][j]>max?dtw[i][j]:max;
     }}
 
     cout << "Distance: " << dtw[inputSize-1][trackSize-1] << endl;
 
-    const int WIDTH = 1366, HEIGHT = 512;
+    const int WIDTH = 640, HEIGHT = 640;
     cv::Mat img(HEIGHT, WIDTH, CV_8UC1, cv::Scalar(0));
     for(int x=0; x<WIDTH; ++x){ for(int y=0; y<HEIGHT; ++y){
-            img.at<uchar>(y,x) = 255*dtw[x*inputSize/WIDTH][y*trackSize/HEIGHT]/max;
+            img.at<uchar>(y,x) = 255*pow(dtw[x*inputSize/WIDTH][y*trackSize/HEIGHT]/(double)max, 0.2);
     }}
 
     computePath();
@@ -94,8 +95,25 @@ coord DTW::prevStep(coord actual){
     return toReturn;
 }
 
-bool DTW::myIsMin(long long int a, long long int b){
+bool DTW::myIsMin(long a, long b){
     if(b==INFTY) return true;
     if(a==INFTY) return false;
     return (a<=b);
+}
+
+/**
+ * @brief DTW::myAdd Compute the sum taking count of the infinity values
+ * @param a
+ * @param b
+ * @return
+ */
+long int DTW::myAdd(long a, long b){
+    assert(a==INFTY || a>=0);
+    assert(b==INFTY || b>=0);
+    if(a==INFTY || b==INFTY) return INFTY;
+    else return a+b;
+}
+
+int DTW::getTrackAdaptedTime(int currentTime){
+
 }
