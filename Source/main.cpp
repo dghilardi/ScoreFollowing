@@ -79,13 +79,13 @@ void pitchDetect(string inputName){
     //DTW dtw(mid, extractedPitch);
     double time=0;
     vector<int> input;
-    ODTW odtw(extractedPitch, 500, 3);
-    while(time<extractedPitch2.getLength()){
-        PrintUtils::printPercentage(time, extractedPitch2.getLength());
+    ODTW odtw(mid, 500, 3);
+    while(time<extractedPitch.getLength()){
+        PrintUtils::printPercentage(time, extractedPitch.getLength());
         input.clear();
         for(int i=1; i<10; ++i){
-            if(time>=extractedPitch2.getLength()) break;
-            input.push_back(extractedPitch2.getPitch(time));
+            if(time>=extractedPitch.getLength()) break;
+            input.push_back(extractedPitch.getPitch(time));
             time+=1;
             //cout << extractedPitch.getPitch(time) << endl;
         }

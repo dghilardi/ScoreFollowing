@@ -4,6 +4,12 @@ ODTW::ODTW(PitchStream &_track, int _c, int _maxRunCount) : t(0), j(0), previous
     costMatrix[t][j]=track.getDistance(SILENCE, j);
 }
 
+/**
+ * @brief ODTW::getInc Compute if the next move should compute a row, a column or both
+ * @param mx Represents the position of the input
+ * @param my Represents the position of the track (score)
+ * @return Enum that indicate if the next movement should be a row, a column or both
+ */
 ToCompute ODTW::getInc(int mx, int my){
     ToCompute toReturn;
 

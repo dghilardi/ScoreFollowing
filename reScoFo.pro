@@ -23,7 +23,9 @@ SOURCES += Source/main.cpp \
     Source/audioStream/pitchStream/pitchdetect.cpp \
     Source/dtw.cpp \
     Source/Utils/printutils.cpp \
-    Source/odtw.cpp
+    Source/odtw.cpp \
+    Source/audioStream/featureStream/features.cpp \
+    Source/audioStream/featureStream/featurestream.cpp
 
 HEADERS += \
     Source/audioStream/ogg_stream.h \
@@ -38,7 +40,9 @@ HEADERS += \
     Source/dtw.h \
     Source/Utils/printutils.h \
     Source/settings.h \
-    Source/odtw.h
+    Source/odtw.h \
+    Source/audioStream/featureStream/features.h \
+    Source/audioStream/featureStream/featurestream.h
 
 LIBS += -lvorbis -lvorbisfile -lvorbisenc -laubioext
 
