@@ -20,3 +20,8 @@ void FeatureODTW::appendFeatures(FeatureStream &toAppend){
     input.append(toAppend);
     onlineTimeWarping();
 }
+
+void FeatureODTW::appendSingleFeature(Features *toAppend){
+    input.appendSingle(toAppend);
+    onlineTimeWarping();
+}

@@ -20,8 +20,17 @@ Features::Features(fvec_t *frame, FeatureDetectors &det){
     del_aubio_pvoc(pvoc);
 */
     det.computeFFT(frame, fft);
-    if(det.detect(FeatureDetectors::SPECTRAL_FLUX, frame, fft))cout << "det "<< endl;
+    //if(det.detect(FeatureDetectors::SPECTRAL_FLUX, fft))cout << "det "<< endl;
+    det.computeFeature(FeatureDetectors::MODIFIED_KL, fft, &modifiedKL);
+    det.computeFeature(FeatureDetectors::FRAME_ENERGY, fft, &frameEnergy);
+    det.computeFeature(FeatureDetectors::SPECTRAL_FLUX, fft, &spectralFlux);
+    det.computeFeature(FeatureDetectors::KL_DIVERGENCE, fft, &klDivergence);
+    det.computeFeature(FeatureDetectors::COMPLEX_DOMAIN, fft, &complexDomain);
+    det.computeFeature(FeatureDetectors::PHASE_DEVIATION, fft, &phaseDeviation);
+    det.computeFeature(FeatureDetectors::HIGHFREQ_CONTENT, fft, &highFreqContent);
+
     /* allocate fft and other memory space */
+    /*
     aubio_onsetdetection_t * o =
       new_aubio_onsetdetection(aubio_onset_energy, win_s, numChannels);
     aubio_onsetdetection(o,fft,out);
@@ -71,7 +80,7 @@ Features::Features(fvec_t *frame, FeatureDetectors &det){
         spectralFlux[i] /= 3e2;
         highFreqContent[i] /= 3.2e5;
         frameEnergy[i] /= 4.5e3;
-    }*/
+    }*./
     smpl_t **a = &frameEnergy;
     if((*a)[0]>max) max=(*a)[0];
     if((*a)[1]>max) max=(*a)[1];
@@ -82,7 +91,7 @@ Features::Features(fvec_t *frame, FeatureDetectors &det){
          << "Phase Deviat: " << phaseDeviation[0]
          << "KL diverg: "    << klDivergence[0]
          << "mod KL: "       << modifiedKL[0] << endl;
-    //cout << max << endl;
+    //cout << max << endl;*/
 }
 
 Features::~Features(){

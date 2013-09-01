@@ -110,7 +110,7 @@ long int ODTW::myAdd(long a, long b){
 
 void ODTW::showMatrix(){
 #ifdef USE_OPENCV
-    const int height = 640, width = 640;
+    const int height = 640, width = 1024;
     cv::Mat img(height, width, CV_8UC1, cv::Scalar(128));
     int time = costMatrix.size();
     int trackTime = getTrackSize();
@@ -135,13 +135,13 @@ void ODTW::showMatrix(){
     for(int i=0; i<numhlines; ++i){
         cv::line(img, cv::Point(0, i*height/numhlines), cv::Point(width, i*height/numhlines), cv::Scalar(200));
         stringstream sstream;
-        sstream << (trackSec*i/numhlines)/60 << ":" << (trackSec*i/numhlines)%60;
+        sstream << (trackSec*i/numhlines)/60 << ":" <<setfill('0')<<setw(2)<< (trackSec*i/numhlines)%60;
         putText(img, sstream.str(), cvPoint(3,i*height/numhlines-3), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.7, cv::Scalar(200), 1, CV_AA);
     }
     for(int i=0; i<numvlines; ++i){
         cv::line(img, cv::Point(i*width/numvlines, 0), cv::Point(i*width/numvlines, height), cv::Scalar(200));
         stringstream sstream;
-        sstream << (inputTime*i/numvlines)/60 << ":" << (inputTime*i/numvlines)%60;
+        sstream << (inputTime*i/numvlines)/60 << ":" <<setfill('0')<<setw(2)<< (inputTime*i/numvlines)%60;
         putText(img, sstream.str(), cvPoint(i*width/numhlines+3, height-3), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, cv::Scalar(200), 1, CV_AA);
     }
 

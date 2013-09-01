@@ -23,7 +23,8 @@ public:
     };
 
     void computeFFT(fvec_t *sample, cvec_t *result);
-    smpl_t detect(FeatureType type_index, fvec_t *ibuf, cvec_t *fft);
+    smpl_t detect(FeatureType type_index, cvec_t *fft);
+    void computeFeature(FeatureType type_index, cvec_t *fft, smpl_t **result);
 private:
     aubio_pickpeak_t * picker;
     aubio_pvoc_t *pvoc;

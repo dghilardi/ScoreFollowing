@@ -32,3 +32,7 @@ int FeatureStream::getFeatureDistance(FeatureStream &listA, int indexA, FeatureS
 void FeatureStream::append(const FeatureStream &toAppend){
     featuresList.insert(featuresList.end(), toAppend.featuresList.begin(), toAppend.featuresList.end());
 }
+
+void FeatureStream::appendSingle(Features *toAppend){
+    featuresList.push_back(toAppend);
+}

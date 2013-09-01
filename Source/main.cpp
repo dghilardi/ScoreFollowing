@@ -14,6 +14,7 @@
 #include "odtw/pitchodtw.h"
 #include "odtw/featureodtw.h"
 #include "Utils/printutils.h"
+#include "audioStream/Input/micinput.h"
 
 using namespace std;
 
@@ -67,7 +68,7 @@ int main(int argc, char* argv[])
 
 void pitchDetect(string inputName){
     OggDecoder decoder("../paganini24.ogg");
-    OggDecoder decoder2("../midpaganini.ogg");
+    //OggDecoder decoder2("../jpaganini24.ogg");
     //PitchDetect extractedPitch(decoder);
     //PitchDetect extractedPitch2(decoder2);
 
@@ -96,11 +97,17 @@ void pitchDetect(string inputName){
     }
     odtw.showMatrix();
     */
-    FeatureStream featuresA(decoder2);
+    //FeatureStream featuresA(decoder2);
     FeatureStream featuresB(decoder);
-    FeatureODTW ftodtw(featuresA, 500, 3);
+    FeatureODTW ftodtw(featuresB, 500, 3);
 
-    ftodtw.appendFeatures(featuresB);
+    MicInput microphone(ftodtw);
+    cout << "READY" << endl;
+    cin.get();
+    microphone.start();
+    cin.get();
+    microphone.stop();
+    //ftodtw.appendFeatures(featuresB);
     ftodtw.showMatrix();
     /*uint channelNumber = 0;
     OggDecoder decoder(inputName, &channelNumber);

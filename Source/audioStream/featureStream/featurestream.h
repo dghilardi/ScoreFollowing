@@ -16,6 +16,7 @@ public:
     FeatureStream(PCMStream &stream);
 
     void append(const FeatureStream &toAppend);
+    void appendSingle(Features *toAppend);
     int getLength();
 
     static int getFeatureDistance(FeatureStream &listA, int indexA, FeatureStream &listB, int indexB);

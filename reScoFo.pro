@@ -35,7 +35,9 @@ SOURCES += Source/main.cpp \
     Source/audioStream/featureStream/featurestream.cpp \
     Source/odtw/pitchodtw.cpp \
     Source/odtw/featureodtw.cpp \
-    Source/audioStream/featureStream/featuredetectors.cpp
+    Source/audioStream/featureStream/featuredetectors.cpp \
+    Source/audioStream/Input/micinput.cpp \
+    Source/audioStream/Input/AudioBuffer.cpp
 
 HEADERS += \
     Source/audioStream/ogg_stream.h \
@@ -55,7 +57,9 @@ HEADERS += \
     Source/audioStream/featureStream/featurestream.h \
     Source/odtw/pitchodtw.h \
     Source/odtw/featureodtw.h \
-    Source/audioStream/featureStream/featuredetectors.h
+    Source/audioStream/featureStream/featuredetectors.h \
+    Source/audioStream/Input/micinput.h \
+    Source/audioStream/Input/AudioBuffer.h
 
-LIBS += -lvorbis -lvorbisfile -lvorbisenc -laubioext
+LIBS += -lvorbis -lvorbisfile -lvorbisenc -laubioext -lportaudiocpp -lpthread -lportaudio
 

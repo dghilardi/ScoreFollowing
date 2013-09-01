@@ -15,6 +15,7 @@ class FeatureODTW : public ODTW
 public:
     FeatureODTW(FeatureStream &_track, int _c, int _maxRunCount);
     void appendFeatures(FeatureStream &toAppend);
+    void appendSingleFeature(Features *toAppend);
 };
 
 #endif // FEATUREODTW_H

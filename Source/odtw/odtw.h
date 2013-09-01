@@ -14,6 +14,7 @@
 
 #ifdef USE_OPENCV
 #include <sstream>
+#include <iomanip>
 #endif
 
 #define INFTY -1
