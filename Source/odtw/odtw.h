@@ -6,11 +6,15 @@
 
 #include <iostream>
 
-#include "audioStream/pitchStream/pitchstream.h"
+#include "../audioStream/pitchStream/pitchstream.h"
 
-#include "debugHeader.h"
-#include "settings.h"
-#include "Utils/printutils.h"
+#include "../debugHeader.h"
+#include "../settings.h"
+#include "../Utils/printutils.h"
+
+#ifdef USE_OPENCV
+#include <sstream>
+#endif
 
 #define INFTY -1
 
@@ -29,6 +33,7 @@ struct matPoint{
 using namespace std;
 class ODTW
 {
+protected:
     int c;
     int t, j;
     int runCount, maxRunCount;
@@ -36,17 +41,19 @@ class ODTW
     map<int, map<int, long int> > costMatrix;
     vector<matPoint> path;
 
-    PitchStream &track;
-    vector<int> input;
-
     ToCompute getInc(int mx, int my);
     void evaluatePathCost(int x, int y);
     bool myIsMin(long a, long b);
     long int myAdd(long a, long b);
+
+    virtual int getInputSize()=0;
+    virtual int getTrackSize()=0;
+    virtual int getDistance(int x, int y)=0;
 public:
-    ODTW(PitchStream &_track, int _c, int _maxRunCount);
-    void onlineTimeWarping(vector<int> newFrames);
+    ODTW(int _c, int _maxRunCount);
+    void onlineTimeWarping();
     void showMatrix();
+    // void appendPitch(vector<int> newFrames);
 };
 
 #endif // ODTW_H

@@ -1,7 +1,7 @@
 #include "odtw.h"
 
-ODTW::ODTW(PitchStream &_track, int _c, int _maxRunCount) : t(0), j(0), previous(NONE), runCount(0), track(_track), c(_c), maxRunCount(_maxRunCount){
-    costMatrix[t][j]=track.getDistance(SILENCE, j);
+ODTW::ODTW(int _c, int _maxRunCount) : t(0), j(0), previous(NONE), runCount(0), c(_c), maxRunCount(_maxRunCount){
+    costMatrix[t][j]=0;
 }
 
 /**
@@ -49,11 +49,10 @@ ToCompute ODTW::getInc(int mx, int my){
     return toReturn;
 }
 
-
-void ODTW::onlineTimeWarping(vector<int> newFrames){
-    input.insert(input.end(), newFrames.begin(), newFrames.end());
+void ODTW::onlineTimeWarping(){
     ToCompute toDo = getInc(t, j);
-    while(t<input.size()-1 || toDo==ROW){
+    while(t<getInputSize()-1 || toDo==ROW){
+        cout << t << ": " << getInputSize() << endl;
         if(toDo!=ROW){
             ++t;
             for(int k=(j-c+1>0?j-c+1:0); k<=j; ++k){
@@ -62,7 +61,7 @@ void ODTW::onlineTimeWarping(vector<int> newFrames){
         }
 
         //do{
-            if(toDo!=COLUMN && j<track.getLength()-1){
+            if(toDo!=COLUMN && j<getTrackSize()-1){
                 ++j;
                 for(int k=(t-c+1>0?t-c+1:0); k<=t; ++k){
                     evaluatePathCost(k,j);
@@ -84,10 +83,8 @@ void ODTW::onlineTimeWarping(vector<int> newFrames){
     }
 }
 
-
 void ODTW::evaluatePathCost(int x, int y){
-    assert(x<input.size());
-    int cost = track.getDistance(input[x], y);
+    int cost = getDistance(x, y);
     //if(x==y) assert(cost==0);
     long int min=INFTY;
     const int K=2;
@@ -116,7 +113,7 @@ void ODTW::showMatrix(){
     const int height = 640, width = 640;
     cv::Mat img(height, width, CV_8UC1, cv::Scalar(128));
     int time = costMatrix.size();
-    int trackTime = track.getLength();
+    int trackTime = getTrackSize();
 
     long int max=0;
     for(map<int, map<int, long int> >::iterator it=costMatrix.begin(); it!=costMatrix.end(); ++it){
@@ -131,7 +128,22 @@ void ODTW::showMatrix(){
             if(x<width && y<height)img.at<uchar>(y,x)=((255*jt->second)/max);
         }
     }
-    cout << "maximum: " << max << endl;
+
+    const int numhlines = 10, numvlines = 10;
+    int trackSec = getTrackSize()*1024/44100;
+    int inputTime = getInputSize()*1024/44100;
+    for(int i=0; i<numhlines; ++i){
+        cv::line(img, cv::Point(0, i*height/numhlines), cv::Point(width, i*height/numhlines), cv::Scalar(200));
+        stringstream sstream;
+        sstream << (trackSec*i/numhlines)/60 << ":" << (trackSec*i/numhlines)%60;
+        putText(img, sstream.str(), cvPoint(3,i*height/numhlines-3), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.7, cv::Scalar(200), 1, CV_AA);
+    }
+    for(int i=0; i<numvlines; ++i){
+        cv::line(img, cv::Point(i*width/numvlines, 0), cv::Point(i*width/numvlines, height), cv::Scalar(200));
+        stringstream sstream;
+        sstream << (inputTime*i/numvlines)/60 << ":" << (inputTime*i/numvlines)%60;
+        putText(img, sstream.str(), cvPoint(i*width/numhlines+3, height-3), cv::FONT_HERSHEY_COMPLEX_SMALL, 0.8, cv::Scalar(200), 1, CV_AA);
+    }
 
     for(int i=0; i<path.size(); ++i){
         int x=width*path[i].x/time;
