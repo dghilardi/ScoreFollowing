@@ -16,90 +16,27 @@
 #include "Utils/printutils.h"
 #include "audioStream/Input/micinput.h"
 
+#define ODTW_WINSIZE 500
+#define ODTW_MAXRUN 3
+
 using namespace std;
 
-void pitchDetect(string inputName);
+void micODTW(string trackPath);
+void dtwFiles(string trackPath, string inputPath, bool useOnlineAlgorithm=false);
+void midiDTW(string midiPath, string inputPath);
 
 int main(int argc, char* argv[])
 {
-
-    Ogg_Stream ogg;
-    alutInit(&argc, argv);
-
-    try
-    {
-        if(argc < 2)
-            throw string("oggplayer *.ogg");
-        pitchDetect(argv[1]);
-        return 0;
-        ogg.open(argv[1]);
-
-        ogg.display();
-
-        if(!ogg.playback())
-            throw string("Ogg refused to play.");
-
-        while(ogg.update())
-        {
-            if(!ogg.playing())
-            {
-                if(!ogg.playback())
-                    throw string("Ogg abruptly stopped.");
-                else
-                    cout << "Ogg stream was interrupted.\n";
-            }
-        }
-
-        cout << "Program normal termination.";
-        cin.get();
-    }
-    catch(string error)
-    {
-        cout << error;
-        cin.get();
-    }
-
-    ogg.release();
-
-    alutExit();
-
+    //midiDTW("../paganini24.mid", "../paganini24.ogg");
+    //dtwFiles("../paganini24.ogg", "../jpaganini24.ogg", true);
+    micODTW("../paganini24.ogg");
     return 0;
 }
 
-void pitchDetect(string inputName){
-    OggDecoder decoder("../paganini24.ogg");
-    //OggDecoder decoder2("../jpaganini24.ogg");
-    //PitchDetect extractedPitch(decoder);
-    //PitchDetect extractedPitch2(decoder2);
-
-    //extractedPitch.showNotes();
-    //extractedPitch2.showNotes();
-
-    //Midi_Stream mid("../paganini-24.midi");
-    //mid.showNotes();
-    //cout << "rate: " <<decoder.audio->mVorbis.mInfo.rate << endl;
-    //cout << "midi size: " << mid.getLength() << " pitched size: " << extractedPitch.getLength() << endl;
-    //DTW dtw(mid, extractedPitch);
-    /*
-    double time=0;
-    vector<int> input;
-    PitchODTW odtw(mid, 500, 3);
-    while(time<extractedPitch.getLength()){
-        PrintUtils::printPercentage(time, extractedPitch.getLength());
-        input.clear();
-        for(int i=1; i<10; ++i){
-            if(time>=extractedPitch.getLength()) break;
-            input.push_back(extractedPitch.getPitch(time));
-            time+=1;
-            //cout << extractedPitch.getPitch(time) << endl;
-        }
-        odtw.appendPitch(input);
-    }
-    odtw.showMatrix();
-    */
-    //FeatureStream featuresA(decoder2);
+void micODTW(string trackPath){
+    OggDecoder decoder(trackPath);
     FeatureStream featuresB(decoder);
-    FeatureODTW ftodtw(featuresB, 500, 3);
+    FeatureODTW ftodtw(featuresB, ODTW_WINSIZE, ODTW_MAXRUN);
 
     MicInput microphone(ftodtw);
     cout << "READY" << endl;
@@ -107,47 +44,41 @@ void pitchDetect(string inputName){
     microphone.start();
     cin.get();
     microphone.stop();
-    //ftodtw.appendFeatures(featuresB);
     ftodtw.showMatrix();
-    /*uint channelNumber = 0;
-    OggDecoder decoder(inputName, &channelNumber);
-    aubio_pitchdetection_t * pitchDetObj = new_aubio_pitchdetection(1024,1,channelNumber, decoder.getSampleRate(), aubio_pitch_yinfft, aubio_pitchm_midi);
-    char name[] = "../prova2.mid";
-    Midi_Stream file(name);
-    file.getDistance(1,1);
+}
 
-    cv::Mat img(512, 1366, CV_8UC1, cv::Scalar::all(0));
-    int pos=0;
-    //decoder.play(file);
-    fvec_t frame;
-    //frame.length=decoder.getFrames(file, &(frame.data), &(frame.channels));
-    bool cont=true;
-    while(cont){
-        cont=decoder.readSingleFrame(&(frame.data),&(frame.length));
-        frame.channels = channelNumber;
-        if(frame.length==1024){
-            smpl_t detected = aubio_pitchdetection(pitchDetObj, &frame);
-            smpl_t curlevel = aubio_level_detection(&frame, -90);
-            detected = round(detected);
-            cout << detected <<" level: "<<curlevel<< endl;
-            if(pos<1366){
-                if(curlevel!=1.) cv::line(img, cv::Point(pos, 512-4*detected), cv::Point(pos, 512-4*(detected+1)), cv::Scalar(255));
-                pos++;
-            }else{
-                cvNamedWindow("Graph", CV_WINDOW_AUTOSIZE);
-                cv::imshow("Graph", img);
-                cv::waitKey();
-                img.setTo(cv::Scalar(0));
-                pos=0;
+void dtwFiles(string trackPath, string inputPath, bool useOnlineAlgorithm){
+    OggDecoder trackDec(trackPath);
+    OggDecoder inputDec(inputPath);
+
+    PitchDetect trackPitch(trackDec);
+    PitchDetect inputPitch(inputDec);
+
+    if(useOnlineAlgorithm){
+        double time=0;
+        vector<int> input;
+        PitchODTW odtw(trackPitch, ODTW_WINSIZE, ODTW_MAXRUN);
+        while(time<inputPitch.getLength()){
+            PrintUtils::printPercentage(time, inputPitch.getLength());
+            input.clear();
+            for(int i=1; i<10; ++i){
+                if(time>=inputPitch.getLength()) break;
+                input.push_back(inputPitch.getPitch(time));
+                time+=1;
             }
+            odtw.appendPitch(input);
         }
-        //cout <<"length: "<< frame.length <<" channels: "<< frame.channels <<" data: "<< (frame.length>0?frame.data[0][0]:0.0) << endl;
+        odtw.showMatrix();
+    }else{
+        DTW dTimeWarping(trackPitch, inputPitch);
     }
-    del_aubio_pitchdetection(pitchDetObj);
-    for(StreamMap::iterator it = decoder.mStreams.begin();
-        it != decoder.mStreams.end();
-        ++it) {
-        OggStream* stream = (*it).second;
-        delete stream;
-    }*/
+}
+
+void midiDTW(string midiPath, string inputPath){
+    Midi_Stream midiPitch(midiPath);
+
+    OggDecoder inputDec(inputPath);
+    PitchDetect inputPitch(inputDec);
+
+    DTW dTimeWarping(midiPitch, inputPitch);
 }

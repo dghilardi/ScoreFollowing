@@ -52,7 +52,7 @@ ToCompute ODTW::getInc(int mx, int my){
 void ODTW::onlineTimeWarping(){
     ToCompute toDo = getInc(t, j);
     while(t<getInputSize()-1 || toDo==ROW){
-        cout << t << ": " << getInputSize() << endl;
+        //cout << t << ": " << getInputSize() << endl;
         if(toDo!=ROW){
             ++t;
             for(int k=(j-c+1>0?j-c+1:0); k<=j; ++k){
