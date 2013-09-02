@@ -49,6 +49,9 @@ ToCompute ODTW::getInc(int mx, int my){
     return toReturn;
 }
 
+/**
+ * @brief ODTW::onlineTimeWarping compute the time warping for the new elements in the series
+ */
 void ODTW::onlineTimeWarping(){
     ToCompute toDo = getInc(t, j);
     while(t<getInputSize()-1 || toDo==ROW){
@@ -83,6 +86,11 @@ void ODTW::onlineTimeWarping(){
     }
 }
 
+/**
+ * @brief ODTW::evaluatePathCost Evaluate the cost-matrix in the position x (ref. to the input) and y (ref. to the track)
+ * @param x index of the matrix (input time)
+ * @param y index of the matrix (track time)
+ */
 void ODTW::evaluatePathCost(int x, int y){
     int cost = getDistance(x, y);
     //if(x==y) assert(cost==0);
@@ -95,6 +103,12 @@ void ODTW::evaluatePathCost(int x, int y){
     costMatrix[x][y] = min;
 }
 
+/**
+ * @brief ODTW::myIsMin
+ * @param a
+ * @param b
+ * @return
+ */
 bool ODTW::myIsMin(long a, long b){
     if(b==INFTY) return true;
     if(a==INFTY) return false;
@@ -108,6 +122,9 @@ long int ODTW::myAdd(long a, long b){
     else return a+b;
 }
 
+/**
+ * @brief ODTW::showMatrix Print the obtained matrix and path (using OpenCV)
+ */
 void ODTW::showMatrix(){
 #ifdef USE_OPENCV
     const int height = 640, width = 1024;

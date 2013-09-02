@@ -10,6 +10,11 @@ DTW::~DTW(){
     delete [] dtw;
 }
 
+/**
+ * @brief DTW::computeDinamicTimeWarping compute the Dynamic Time Warping between two series
+ * @param track
+ * @param input
+ */
 void DTW::computeDinamicTimeWarping(PitchStream &track, SinglePitchStream &input){
     inputSize = input.getLength();
     trackSize = track.getLength();
@@ -53,6 +58,9 @@ void DTW::computeDinamicTimeWarping(PitchStream &track, SinglePitchStream &input
     cv::waitKey();
 }
 
+/**
+ * @brief DTW::computePath Compute the minimal path that rappresent the best-matching path for the time series
+ */
 void DTW::computePath(){
     coord actual;
     actual.x=inputSize-1;
@@ -64,6 +72,11 @@ void DTW::computePath(){
     }
 }
 
+/**
+ * @brief DTW::prevStep compute the previous position in the minimal path with a position given
+ * @param actual actual position
+ * @return previous position
+ */
 coord DTW::prevStep(coord actual){
     coord toReturn;
     if(actual.x == 0){
@@ -95,6 +108,12 @@ coord DTW::prevStep(coord actual){
     return toReturn;
 }
 
+/**
+ * @brief DTW::myIsMin Check if the first parameter is less than the second (the parameters must be positive integers, INFTY (-1) is considered the greatest possible)
+ * @param a
+ * @param b
+ * @return true if a is less or equal than b
+ */
 bool DTW::myIsMin(long a, long b){
     if(b==INFTY) return true;
     if(a==INFTY) return false;
