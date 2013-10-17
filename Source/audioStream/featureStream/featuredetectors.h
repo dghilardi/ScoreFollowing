@@ -23,12 +23,14 @@ public:
         TYPE_COUNT //number of types, must be the last
     };
 
+    void computePVOC(fvec_t *sample, cvec_t *result);
     void computeFFT(fvec_t *sample, cvec_t *result);
     smpl_t detect(FeatureType type_index, cvec_t *fft);
     void computeFeature(FeatureType type_index, cvec_t *fft, smpl_t **result);
 private:
     aubio_pickpeak_t * picker;
     aubio_pvoc_t *pvoc;
+    aubio_mfft_t *mfft;
     fvec_t *onset;
     aubio_onsetdetection_t *(det_type[TYPE_COUNT]);
 };

@@ -10,6 +10,7 @@ FeatureDetectors::FeatureDetectors(uint_t win_s, uint_t num_channels){
     det_type[HIGHFREQ_CONTENT] = new_aubio_onsetdetection(aubio_onset_hfc, win_s, num_channels);
 
     pvoc = new_aubio_pvoc(win_s, 1, num_channels);
+    mfft = new_aubio_mfft(win_s, num_channels);
     picker = new_aubio_peakpicker(0.1);
     onset = new_fvec(1, num_channels);
 }
@@ -25,11 +26,16 @@ FeatureDetectors::~FeatureDetectors(){
 
     del_aubio_peakpicker(picker);
     del_aubio_pvoc(pvoc);
+    del_aubio_mfft(mfft);
     del_fvec(onset);
 }
 
-void FeatureDetectors::computeFFT(fvec_t *sample, cvec_t *result){
+void FeatureDetectors::computePVOC(fvec_t *sample, cvec_t *result){
     aubio_pvoc_do(pvoc, sample, result);
+}
+
+void FeatureDetectors::computeFFT(fvec_t *sample, cvec_t *result){
+    aubio_mfft_do(mfft, sample, result);
 }
 
 smpl_t FeatureDetectors::detect(FeatureType type_index, cvec_t *fft){

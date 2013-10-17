@@ -29,7 +29,7 @@ void midiDTW(string midiPath, string inputPath, int flags);
 
 string testSet[] = {
     "../noct15.ogg", "../prova.ogg",                                                      //0
-    "../beets51-mid.ogg", "beets51.ogg",                                                  //1
+    "../beets51-mid.ogg", "../beets51.ogg",                                                  //1
     "../jpaganini24.ogg", "../paganini24.ogg",                                            //2
     "../midpaganini.ogg", "../paganini24.ogg",                                            //3
     "../moonlight.ogg", "../moonlight2.ogg",                                              //4
@@ -41,7 +41,7 @@ string testSet[] = {
 
 int main(int argc, char* argv[])
 {
-    int testI = 8;
+    int testI = 0;
     //midiDTW("../MAPS_MUS-alb_esp2_AkPnStgb-base.mid", "../MAPS_MUS-alb_esp2_AkPnStgb-played.ogg", USEONLINEALGORITHM);
     dtwFiles(testSet[2*testI], testSet[2*testI+1], USEONLINEALGORITHM|USEFEATURES);
     //micODTW("../pagcap1a.ogg");

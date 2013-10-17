@@ -19,7 +19,7 @@ FeatureStream::FeatureStream(PCMStream &stream){
         }
     }
 
-    Features::showChromagram(featuresList);
+    //Features::showChromagram(featuresList);
 }
 
 int FeatureStream::getLength(){
