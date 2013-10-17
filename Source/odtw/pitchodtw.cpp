@@ -36,7 +36,6 @@ int PitchODTW::getTrackSize(){
  * @return distance between input[x] and track[y]
  */
 int PitchODTW::getDistance(int x, int y){
-
     assert(x<input.size());
     int cost = track.getDistance(input[x], y);
 

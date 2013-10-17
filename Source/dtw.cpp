@@ -45,7 +45,7 @@ void DTW::computeDinamicTimeWarping(PitchStream &track, SinglePitchStream &input
     const int WIDTH = 640, HEIGHT = 640;
     cv::Mat img(HEIGHT, WIDTH, CV_8UC1, cv::Scalar(0));
     for(int x=0; x<WIDTH; ++x){ for(int y=0; y<HEIGHT; ++y){
-            img.at<uchar>(y,x) = 255*pow(dtw[x*inputSize/WIDTH][y*trackSize/HEIGHT]/(double)max, 0.2);
+            img.at<uchar>(y,x) = 255*pow(dtw[x*inputSize/WIDTH][y*trackSize/HEIGHT]/(double)max, 0.15);
     }}
 
     computePath();

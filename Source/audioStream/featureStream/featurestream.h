@@ -18,6 +18,7 @@ public:
     void append(const FeatureStream &toAppend);
     void appendSingle(Features *toAppend);
     int getLength();
+    Features *at(int i);
 
     static int getFeatureDistance(FeatureStream &listA, int indexA, FeatureStream &listB, int indexB);
 };

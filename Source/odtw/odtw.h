@@ -55,6 +55,8 @@ public:
     void onlineTimeWarping();
     void showMatrix();
     // void appendPitch(vector<int> newFrames);
+    void printCheckSamples();
+    void showROI(int trackbegin, int trackend, int inputbegin, int inputend);
 };
 
 #endif // ODTW_H

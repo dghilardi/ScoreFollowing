@@ -15,7 +15,7 @@
 
 #define ERROR_NO_FILE "Error! File not found"
 
-#define REDUCTION_FACTOR 15
+#define REDUCTION_FACTOR 1500
 
 using namespace std;
 class Midi_Stream : public PitchStream

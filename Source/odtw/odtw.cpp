@@ -93,6 +93,7 @@ void ODTW::onlineTimeWarping(){
  */
 void ODTW::evaluatePathCost(int x, int y){
     int cost = getDistance(x, y);
+    //cout <<"cost: "<< cost << endl;
     //if(x==y) assert(cost==0);
     long int min=INFTY;
     const int K=2;
@@ -127,10 +128,11 @@ long int ODTW::myAdd(long a, long b){
  */
 void ODTW::showMatrix(){
 #ifdef USE_OPENCV
-    const int height = 640, width = 1024;
-    cv::Mat img(height, width, CV_8UC1, cv::Scalar(128));
     int time = costMatrix.size();
     int trackTime = getTrackSize();
+    const int height = 640, width = 640;
+    //const int height = trackTime, width = time;
+    cv::Mat img(height, width, CV_8UC1, cv::Scalar(128));
 
     long int max=0;
     for(map<int, map<int, long int> >::iterator it=costMatrix.begin(); it!=costMatrix.end(); ++it){
@@ -168,11 +170,66 @@ void ODTW::showMatrix(){
         assert(x<time);
         assert(y<trackTime);
         if(x<width && y<height)img.at<uchar>(y,x)=255;
+
+        //if((path[i].x%215)==0){
+        //    cout << "sec: " << (path[i].x/43) << " -> " << (100*(path[i-10].x-path[i+10].x)/(float)(path[i-10].y-path[i+10].y)) << endl;
+        //}
     }
-    cvNamedWindow("ODTW", CV_WINDOW_AUTOSIZE);
+    cv::namedWindow("ODTW");
     cv::imshow("ODTW", img);
     cv::waitKey();
 #else
     PrintUtils::errNoOpenCV();
 #endif
+}
+
+void ODTW::showROI(int trackbegin, int trackend, int inputbegin, int inputend){
+#ifdef USE_OPENCV
+    int beginTrackFrame = (trackbegin*44100)/1024;
+    int beginInputFrame = (inputbegin*44100)/1024;
+    int endTrackFrame = (trackend*44100)/1024;
+    int endInputFrame = (inputend*44100)/1024;
+    cout << endTrackFrame-beginTrackFrame << "x" << endInputFrame-beginInputFrame << endl;
+    cv::Mat img(endTrackFrame-beginTrackFrame, endInputFrame-beginInputFrame, CV_8UC1, cv::Scalar(128));
+
+    //find max value
+    long max = 0;
+    long min = LONG_MAX;
+    for(int x=beginInputFrame; x<endInputFrame; ++x){
+        for(int y=beginTrackFrame; y<endTrackFrame; ++y){
+            if(costMatrix[x].count(y)){
+                if(max<costMatrix[x][y]) max=costMatrix[x][y];
+                if(min>costMatrix[x][y]) min=costMatrix[x][y];
+            }
+        }
+    }
+
+    for(int x=beginInputFrame; x<endInputFrame; ++x){
+        for(int y=beginTrackFrame; y<endTrackFrame; ++y){
+            if(costMatrix[x].count(y))
+                img.at<uchar>(y-beginTrackFrame, x-beginInputFrame) = (255*(costMatrix[x][y]-min))/(max-min);
+        }
+    }
+
+    for(int i=0; i<path.size(); ++i){
+        int x=path[i].x-beginInputFrame;
+        int y=path[i].y-beginTrackFrame;
+        if(x>=0 && y>=0 && x<img.cols && y<img.rows) img.at<uchar>(y,x)=255;
+    }
+
+    cv::namedWindow("ROI cost matrix", cv::WINDOW_NORMAL);
+    cv::imshow("ROI cost matrix",img);
+#else
+    PrintUtils::errNoOpenCV();
+#endif
+}
+
+void ODTW::printCheckSamples(){
+    const float sampleToSecFactor = 1024/44100.0;
+
+    const int numSamples = 10;
+    for(int i=0; i<numSamples; ++i){
+        matPoint pt = path.at(path.size()/numSamples*i);
+        cout << "track: " << ((int)(pt.y*sampleToSecFactor))/60 <<":"<<setfill('0')<<setw(2)<< ((int)(pt.y*sampleToSecFactor))%60  << "\tinput: " << ((int)(pt.x*sampleToSecFactor))/60<<":"<<setfill('0')<<setw(2)<< ((int)(pt.x*sampleToSecFactor))%60 << endl;
+    }
 }

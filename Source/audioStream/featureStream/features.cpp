@@ -20,6 +20,7 @@ Features::Features(fvec_t *frame, FeatureDetectors &det){
     del_aubio_pvoc(pvoc);
 */
     det.computeFFT(frame, fft);
+    fillChromaVector(fft);
     //if(det.detect(FeatureDetectors::SPECTRAL_FLUX, fft))cout << "det "<< endl;
     det.computeFeature(FeatureDetectors::MODIFIED_KL, fft, &modifiedKL);
     det.computeFeature(FeatureDetectors::FRAME_ENERGY, fft, &frameEnergy);
@@ -158,6 +159,9 @@ double Features::getSingleDistance(smpl_t *featureA, int featureAChanNum, smpl_t
         distance = meanA-meanB;
         distance *= distance;
     }
+    //distance = log10(distance+1.0);
+    //distance = atan(distance);
+    //cout << "sdist: " << distance << endl;
     return distance;
 }
 
@@ -170,18 +174,101 @@ int Features::getDistance(Features *elem, Features *other){
     double euclideanDist = 0;
     int otherChannelNumber = other->numChannels;
 
-    euclideanDist += getSingleDistance(elem->modifiedKL, elem->numChannels, other->modifiedKL, otherChannelNumber);
+    for(int i=0; i<NBINS; ++i) euclideanDist += pow(elem->chromaVector[i]-other->chromaVector[i], 2);
+
+    /*
+    //euclideanDist += getSingleDistance(elem->modifiedKL, elem->numChannels, other->modifiedKL, otherChannelNumber);
     euclideanDist += getSingleDistance(elem->frameEnergy, elem->numChannels, other->frameEnergy, otherChannelNumber);
     euclideanDist += getSingleDistance(elem->spectralFlux, elem->numChannels, other->spectralFlux, otherChannelNumber);
     euclideanDist += getSingleDistance(elem->klDivergence, elem->numChannels, other->klDivergence, otherChannelNumber);
     euclideanDist += getSingleDistance(elem->complexDomain, elem->numChannels, other->complexDomain, otherChannelNumber);
     euclideanDist += getSingleDistance(elem->phaseDeviation, elem->numChannels, other->phaseDeviation, otherChannelNumber);
     euclideanDist += getSingleDistance(elem->highFreqContent, elem->numChannels, other->highFreqContent, otherChannelNumber);
-
-    euclideanDist = 100*sqrt(euclideanDist);
-
+    */
+    assert(euclideanDist>=0);
+    euclideanDist = 10*sqrt(euclideanDist);
     //if(!(euclideanDist==0 || (euclideanDist-(int)euclideanDist)/euclideanDist<0.1)) cerr << "Error too high"<<endl;
     //assert(euclideanDist==0 || (euclideanDist-(int)euclideanDist)/euclideanDist<0.1);
-
+    assert(euclideanDist>=0);
+    if(euclideanDist>INT_MAX) return INT_MAX;
+    if(elem->isSilence && other->isSilence) return 0;
+    //if(elem->isSilence != other->isSilence) return 50;
     return euclideanDist;
+}
+
+int Features::getBin(int frequency){
+    return ((int)round(69+12*log2(frequency/440.0)))%12;
+}
+
+void Features::fillChromaVector(cvec_t *fft){
+    int nmatches[NBINS];
+    for(unsigned int i=0; i<NBINS; ++i){
+        nmatches[i] = 0;
+        chromaVector[i] = 0;
+    }
+    for(unsigned int i=0; i<fft->length/2; ++i){
+        int frequency = i*FS/fft->length;
+        int bin = getBin(frequency);
+        chromaVector[bin] += fft->norm[0][i];
+        nmatches[bin]++;
+    }
+
+    //mean
+    for(int i=0; i<NBINS; ++i) chromaVector[i]/=nmatches[i];
+    /*
+    float tot = 0;
+    for(int i=0; i<NBINS; ++i) tot+=chromaVector[i];
+    if(tot>0 && !isSilence)
+        for(int i=0; i<NBINS; ++i) chromaVector[i]/=(tot/10);
+    else
+        for(int i=0; i<NBINS; ++i) chromaVector[i] = 0;
+    */
+
+    //Zero mean, unit variance
+    //compute mean
+    double tot=0;
+    for(int i=0; i<NBINS; ++i) tot += chromaVector[i];
+    double mean = tot/(double)NBINS;
+
+    //compute standard deviation
+    tot=0;
+    for(int i=0; i<NBINS; ++i) tot+=pow(chromaVector[i]-mean,2);
+    float stddev = sqrt(tot/NBINS);
+
+    //normalize
+    double var = 0, m=0;
+    for(int i=0; i<NBINS; ++i){
+        chromaVector[i] = (chromaVector[i]-mean)/stddev;
+        //cout << chromaVector[i]<<"\t";
+        var += pow(chromaVector[i], 2);
+        m+=chromaVector[i];
+    }
+    //cout << endl;
+    var=var/NBINS;
+    m=m/NBINS;
+    //cout << "Varianza: " << var << ", Media: " << m << endl;
+    assert(var-1.0 < 1e-5 && var-1.0 > -1e-5 || isSilence);
+    assert(m<1e-5 && m>-1e-5 || isSilence);
+    if(isSilence) for(int i=0; i<NBINS; ++i) chromaVector[i]=0;
+
+}
+
+void Features::showChromagram(vector<Features*> &data){
+#ifdef USE_OPENCV
+    const int vscale=50;
+    cv::Mat img(vscale*NBINS, data.size(), CV_8UC1, cv::Scalar(0));
+    float min=data[0]->chromaVector[0], max=min;
+    for(uint i=0; i<data.size(); ++i){ for(int j=0; j<NBINS; ++j){
+            if(data[i]->chromaVector[j]>max) max = data[i]->chromaVector[j];
+            if(data[i]->chromaVector[j]<min) min = data[i]->chromaVector[j];
+        }}
+    for(uint i=0; i<data.size(); ++i){ for(int j=0; j<NBINS; ++j){
+            cv::line(img, cv::Point(i,j*vscale), cv::Point(i,(j+1)*vscale-1), cv::Scalar(255*(data[i]->chromaVector[j]-min)/(max-min)));
+    }}
+    cv::namedWindow("chromagram", cv::WINDOW_NORMAL);
+    cv::imshow("chromagram", img);
+    cv::waitKey();
+#else
+    PrintUtils::errNoOpenCV();
+#endif
 }

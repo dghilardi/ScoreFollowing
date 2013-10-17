@@ -41,5 +41,5 @@ smpl_t FeatureDetectors::detect(FeatureType type_index, cvec_t *fft){
 void FeatureDetectors::computeFeature(FeatureType type_index, cvec_t *fft, smpl_t **result){
     aubio_onsetdetection(det_type[type_index], fft, onset);
     (*result) = new smpl_t[onset->channels];
-    for(int i=0; i<onset->channels; ++i) (*result)[i] = onset->data[i][0];
+    for(unsigned int i=0; i<onset->channels; ++i) (*result)[i] = onset->data[i][0];
 }

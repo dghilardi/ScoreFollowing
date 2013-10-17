@@ -2,6 +2,7 @@
 #define FEATUREDETECTORS_H
 
 #include <aubio/aubio.h>
+#include <cmath>
 
 #include "../../debugHeader.h"
 
