@@ -6,7 +6,23 @@ Midi_Stream::Midi_Stream(string filename){
     FileInputStream midiStream(midiFile);
 
     if(!fMidi.readFrom(midiStream)) throw string(ERROR_NO_FILE);
-    length = fMidi.getLastTimestamp()/REDUCTION_FACTOR+1;
+
+    fMidi.convertTimestampTicksToSeconds();
+    cout << fMidi.getTimeFormat() << endl;
+    short tformat = fMidi.getTimeFormat();
+    double normalizationFactor;
+    if(tformat<0){
+        short tpf = tformat & 0xFF;
+        short fps = (-tformat & 0xFF00)>>8;
+        int ticksPerSecond = tpf*fps;
+        normalizationFactor = 44100/(double)(ticksPerSecond*1024);
+        cout << "fps: " << fps << " tpf: " << tpf <<" norm-factor: "<<normalizationFactor<< endl;
+    }else{
+
+    }
+    //throw;
+
+    length = fMidi.getLastTimestamp()*SCALE_FACTOR+1;
     //create map structure
     songMap = new bool*[length];
     for(int i=0; i<length; ++i) songMap[i] = new bool[NUM_MID_NOTES]();
@@ -18,12 +34,13 @@ Midi_Stream::Midi_Stream(string filename){
             const MidiMessageSequence::MidiEventHolder *evt = track->getEventPointer(j);
             if(evt->message.isNoteOn()){
                 const MidiMessageSequence::MidiEventHolder *evtoff = evt->noteOffObject;
-                int begin = evt->message.getTimeStamp();
-                int end = evtoff->message.getTimeStamp();
+                double begin = evt->message.getTimeStamp();
+                double end = evtoff->message.getTimeStamp();
+                cout << "begin: " << begin << " end: " << end << endl;
                 for(int k=begin; k<end; ++k){
-                    int fstidx = k/REDUCTION_FACTOR;
+                    int fstidx = k*SCALE_FACTOR;
                     int sndidx = evt->message.getNoteNumber();
-                    songMap[k/REDUCTION_FACTOR][evt->message.getNoteNumber()] = true;
+                    songMap[k*SCALE_FACTOR][evt->message.getNoteNumber()] = true;
                 }
             }
         }
@@ -33,6 +50,10 @@ Midi_Stream::Midi_Stream(string filename){
 Midi_Stream::~Midi_Stream(){
     for(int i=0; i<length; ++i) delete [] songMap[i];
     delete [] songMap;
+}
+
+const bool *Midi_Stream::getPitchFrame(int time){
+    return songMap[time];
 }
 
 int Midi_Stream::getDistance(int pitch, int time){

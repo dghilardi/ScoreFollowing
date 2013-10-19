@@ -21,6 +21,7 @@ Features::Features(fvec_t *frame, FeatureDetectors &det){
 */
     det.computeFFT(frame, fft);
     fillChromaVector(fft);
+    /*
     //if(det.detect(FeatureDetectors::SPECTRAL_FLUX, fft))cout << "det "<< endl;
     det.computeFeature(FeatureDetectors::MODIFIED_KL, fft, &modifiedKL);
     det.computeFeature(FeatureDetectors::FRAME_ENERGY, fft, &frameEnergy);
@@ -206,51 +207,51 @@ void Features::fillChromaVector(cvec_t *fft){
         nmatches[i] = 0;
         chromaVector[i] = 0;
     }
-    for(unsigned int i=0; i<fft->length/2; ++i){
-        int frequency = i*FS/fft->length;
-        int bin = getBin(frequency);
-        chromaVector[bin] += fft->norm[0][i];
-        nmatches[bin]++;
+    if(!isSilence){
+        for(unsigned int i=0; i<fft->length/2; ++i){
+            int frequency = i*FS/fft->length;
+            int bin = getBin(frequency);
+            chromaVector[bin] += fft->norm[0][i];
+            nmatches[bin]++;
+        }
+
+        //mean
+        for(int i=0; i<NBINS; ++i) if(nmatches>0) chromaVector[i]/=nmatches[i];
+        /*
+        float tot = 0;
+        for(int i=0; i<NBINS; ++i) tot+=chromaVector[i];
+        if(tot>0 && !isSilence)
+            for(int i=0; i<NBINS; ++i) chromaVector[i]/=(tot/10);
+        else
+            for(int i=0; i<NBINS; ++i) chromaVector[i] = 0;
+        */
+
+        //Zero mean, unit variance
+        //compute mean
+        double tot=0;
+        for(int i=0; i<NBINS; ++i) tot += chromaVector[i];
+        double mean = tot/(double)NBINS;
+
+        //compute standard deviation
+        tot=0;
+        for(int i=0; i<NBINS; ++i) tot+=pow(chromaVector[i]-mean,2);
+        float stddev = sqrt(tot/NBINS);
+
+        //normalize
+        double var = 0, m=0;
+        for(int i=0; i<NBINS; ++i){
+            chromaVector[i] = (chromaVector[i]-mean)/stddev;
+            cout << std::fixed << (chromaVector[i]>0?" ":"")<<chromaVector[i]<<"\t";
+            var += pow(chromaVector[i], 2);
+            m+=chromaVector[i];
+        }
+        cout << endl;
+        var=var/NBINS;
+        m=m/NBINS;
+        //cout << "Varianza: " << var << ", Media: " << m << endl;
+        assert(var-1.0 < 1e-5 && var-1.0 > -1e-5 || isSilence);
+        assert(m<1e-5 && m>-1e-5 || isSilence);
     }
-
-    //mean
-    for(int i=0; i<NBINS; ++i) chromaVector[i]/=nmatches[i];
-    /*
-    float tot = 0;
-    for(int i=0; i<NBINS; ++i) tot+=chromaVector[i];
-    if(tot>0 && !isSilence)
-        for(int i=0; i<NBINS; ++i) chromaVector[i]/=(tot/10);
-    else
-        for(int i=0; i<NBINS; ++i) chromaVector[i] = 0;
-    */
-
-    //Zero mean, unit variance
-    //compute mean
-    double tot=0;
-    for(int i=0; i<NBINS; ++i) tot += chromaVector[i];
-    double mean = tot/(double)NBINS;
-
-    //compute standard deviation
-    tot=0;
-    for(int i=0; i<NBINS; ++i) tot+=pow(chromaVector[i]-mean,2);
-    float stddev = sqrt(tot/NBINS);
-
-    //normalize
-    double var = 0, m=0;
-    for(int i=0; i<NBINS; ++i){
-        chromaVector[i] = (chromaVector[i]-mean)/stddev;
-        cout << std::fixed << (chromaVector[i]>0?" ":"")<<chromaVector[i]<<"\t";
-        var += pow(chromaVector[i], 2);
-        m+=chromaVector[i];
-    }
-    cout << endl;
-    var=var/NBINS;
-    m=m/NBINS;
-    //cout << "Varianza: " << var << ", Media: " << m << endl;
-    assert(var-1.0 < 1e-5 && var-1.0 > -1e-5 || isSilence);
-    assert(m<1e-5 && m>-1e-5 || isSilence);
-    if(isSilence) for(int i=0; i<NBINS; ++i) chromaVector[i]=0;
-
 }
 
 void Features::showChromagram(vector<Features*> &data){

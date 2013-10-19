@@ -27,11 +27,13 @@ private:
     static double max;
     uint_t numChannels;
     smpl_t *frameEnergy, *highFreqContent, *spectralFlux, *phaseDeviation, *klDivergence, *modifiedKL, *complexDomain;
-    bool isSilence;
 
     void fillFeature(smpl_t **feature, fvec_t *computed);
     static double getSingleDistance(smpl_t *featureA, int featureAChanNum, smpl_t *featureB, int otherChanNumb);
+protected:
+    Features(){};
     float chromaVector[NBINS];
+    bool isSilence;
 public:
     Features(fvec_t *frame, FeatureDetectors &det);
     Features(const Features &other);

@@ -10,6 +10,7 @@
 #include "audioStream/pitchStream/midi_stream.h"
 #include "audioStream/pitchStream/pitchdetect.h"
 #include "audioStream/featureStream/pcmfeaturestream.h"
+#include "audioStream/featureStream/midifeaturestream.h"
 #include "dtw.h"
 #include "odtw/pitchodtw.h"
 #include "odtw/featureodtw.h"
@@ -39,10 +40,16 @@ string testSet[] = {
     "../MAPS_MUS-alb_esp2_AkPnStgb-base.ogg", "../MAPS_MUS-alb_esp2_AkPnStgb-played.ogg"  //8
 };
 
+string midiTestSet[] = {
+    "../MAPS_MUS-alb_esp2_AkPnStgb-base.mid", "../MAPS_MUS-alb_esp2_AkPnStgb-played.ogg",
+    "../midpagcap1.mid", "../midpagcap1.ogg",
+    "../midpagcap1.mid", "../pagcap1a.ogg"
+};
+
 int main(int argc, char* argv[])
 {
-    int testI = 3;
-    midiDTW("../MAPS_MUS-alb_esp2_AkPnStgb-base.mid", "../MAPS_MUS-alb_esp2_AkPnStgb-played.ogg", USEONLINEALGORITHM);
+    int testI = 2;
+    midiDTW(midiTestSet[2*testI], midiTestSet[2*testI+1], USEONLINEALGORITHM);
     //dtwFiles(testSet[2*testI], testSet[2*testI+1], USEONLINEALGORITHM|USEFEATURES);
     //micODTW(testSet[2*testI]);
     return 0;
@@ -115,22 +122,38 @@ void dtwFiles(string trackPath, string inputPath, int flags){
 
 void midiDTW(string midiPath, string inputPath, int flags){
     bool useOnlineAlgorithm = flags & USEONLINEALGORITHM;
+    bool useFeatures = flags & USEFEATURES;
+
     Midi_Stream midiPitch(midiPath);
 
     OggDecoder inputDec(inputPath);
-    PitchDetect inputPitch(inputDec);
 
     if(useOnlineAlgorithm){
-        PitchODTW odtw(midiPitch, ODTW_WINSIZE, ODTW_MAXRUN);
-        int inputLength = inputPitch.getLength();
-        for(int i=0; i<inputLength; ++i){
-            PrintUtils::printPercentage(i, inputLength);
-            vector<int> toPass;
-            toPass.push_back(inputPitch.getPitch(i));
-            odtw.appendPitch(toPass);
+        if(useFeatures){
+            MIDIFeatureStream midiFt(midiPitch);
+            PCMFeatureStream inputFeatures(inputDec);
+            FeatureODTW odtw(midiFt, ODTW_WINSIZE, ODTW_MAXRUN);
+            int inputLength = inputFeatures.getLength();
+            for(int i=0; i<inputLength; ++i){
+                PrintUtils::printPercentage(i, inputLength);
+                odtw.appendSingleFeature(inputFeatures.at(i));
+            }
+            odtw.printCheckSamples();
+            odtw.showMatrix();
+        }else{
+            PitchDetect inputPitch(inputDec);
+            PitchODTW odtw(midiPitch, ODTW_WINSIZE, ODTW_MAXRUN);
+            int inputLength = inputPitch.getLength();
+            for(int i=0; i<inputLength; ++i){
+                PrintUtils::printPercentage(i, inputLength);
+                vector<int> toPass;
+                toPass.push_back(inputPitch.getPitch(i));
+                odtw.appendPitch(toPass);
+            }
+            odtw.showMatrix();
         }
-        odtw.showMatrix();
     }else{
+        PitchDetect inputPitch(inputDec);
         DTW dTimeWarping(midiPitch, inputPitch);
     }
 }

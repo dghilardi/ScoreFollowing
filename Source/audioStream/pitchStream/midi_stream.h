@@ -15,7 +15,7 @@
 
 #define ERROR_NO_FILE "Error! File not found"
 
-#define REDUCTION_FACTOR 1500
+#define SCALE_FACTOR 43
 
 using namespace std;
 class Midi_Stream : public PitchStream
@@ -31,6 +31,7 @@ public:
 
     void showNotes();
     void adaptMidi(string outputName, const DTW timeWarping);
+    const bool *getPitchFrame(int time);
 };
 
 #endif // MIDI_STREAM_H

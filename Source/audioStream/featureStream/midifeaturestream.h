@@ -3,6 +3,7 @@
 
 #include "featurestream.h"
 #include "../pitchStream/midi_stream.h"
+#include "midifeatures.h"
 
 class MIDIFeatureStream : public FeatureStream
 {
