@@ -227,7 +227,7 @@ void ODTW::showROI(int trackbegin, int trackend, int inputbegin, int inputend){
 void ODTW::printCheckSamples(){
     const float sampleToSecFactor = 1024/44100.0;
 
-    const int numSamples = 10;
+    const int numSamples = 40;
     for(int i=0; i<numSamples; ++i){
         matPoint pt = path.at(path.size()/numSamples*i);
         cout << "track: " << ((int)(pt.y*sampleToSecFactor))/60 <<":"<<setfill('0')<<setw(2)<< ((int)(pt.y*sampleToSecFactor))%60  << "\tinput: " << ((int)(pt.x*sampleToSecFactor))/60<<":"<<setfill('0')<<setw(2)<< ((int)(pt.x*sampleToSecFactor))%60 << endl;

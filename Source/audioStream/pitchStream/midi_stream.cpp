@@ -6,10 +6,10 @@ Midi_Stream::Midi_Stream(string filename){
     FileInputStream midiStream(midiFile);
 
     if(!fMidi.readFrom(midiStream)) throw string(ERROR_NO_FILE);
-    length = fMidi.getLastTimestamp()/REDUCTION_FACTOR;
+    length = fMidi.getLastTimestamp()/REDUCTION_FACTOR+1;
     //create map structure
-    songMap = new bool*[NUM_MID_NOTES];
-    for(int i=0; i<NUM_MID_NOTES; ++i) songMap[i] = new bool[length]();
+    songMap = new bool*[length];
+    for(int i=0; i<length; ++i) songMap[i] = new bool[NUM_MID_NOTES]();
     int tracksNumber = fMidi.getNumTracks();
     for(int i=0; i<tracksNumber; ++i){
         const MidiMessageSequence *track = fMidi.getTrack(i);
@@ -20,14 +20,18 @@ Midi_Stream::Midi_Stream(string filename){
                 const MidiMessageSequence::MidiEventHolder *evtoff = evt->noteOffObject;
                 int begin = evt->message.getTimeStamp();
                 int end = evtoff->message.getTimeStamp();
-                for(int k=begin; k<end; ++k) songMap[evt->message.getNoteNumber()][k/REDUCTION_FACTOR] = true;
+                for(int k=begin; k<end; ++k){
+                    int fstidx = k/REDUCTION_FACTOR;
+                    int sndidx = evt->message.getNoteNumber();
+                    songMap[k/REDUCTION_FACTOR][evt->message.getNoteNumber()] = true;
+                }
             }
         }
     }
 }
 
 Midi_Stream::~Midi_Stream(){
-    for(int i=0; i<NUM_MID_NOTES; ++i) delete [] songMap[i];
+    for(int i=0; i<length; ++i) delete [] songMap[i];
     delete [] songMap;
 }
 
@@ -37,18 +41,18 @@ int Midi_Stream::getDistance(int pitch, int time){
     int distance = 0;
     if(pitch==SILENCE){
         bool isTrackSilence = true;
-        for(int i=0; i<NUM_MID_NOTES; ++i) if(songMap[i][time]) isTrackSilence = false;
+        for(int i=0; i<NUM_MID_NOTES; ++i) if(songMap[time][i]) isTrackSilence = false;
         return (isTrackSilence ? 0 : SILENCE_DIST);
     }
-    if(songMap[pitch][time]) return 0;
+    if(songMap[time][pitch]) return 0;
     for(int i=pitch; i<NUM_MID_NOTES; ++i){
-        if(songMap[i][time]){
+        if(songMap[time][i]){
             distance = i-pitch;
             break;
         }
     }
     for(int i=pitch; i>=0; --i){
-        if(songMap[i][time] && (time-i<distance || distance==0)){
+        if(songMap[time][i] && (time-i<distance || distance==0)){
             distance = pitch-i;
             break;
         }
@@ -73,7 +77,7 @@ void Midi_Stream::showNotes(){
     for(int x=0; x<width; ++x){
         int vecpos = x*length/width;
         for(int y=0; y<NUM_MID_NOTES; ++y){
-            if(songMap[y][vecpos]) cv::line(img, cv::Point(x,y*hconst), cv::Point(x,(y+1)*hconst-1), cv::Scalar(255));
+            if(songMap[vecpos][y]) cv::line(img, cv::Point(x,y*hconst), cv::Point(x,(y+1)*hconst-1), cv::Scalar(255));
         }
     }
     cvNamedWindow("MIDI RAPP", CV_WINDOW_AUTOSIZE);

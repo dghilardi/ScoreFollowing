@@ -5,6 +5,7 @@
 #include <climits>
 #include <algorithm>
 #include <iostream>
+#include <iomanip>
 #include <vector>
 #include <aubio/aubio.h>
 

@@ -10,10 +10,10 @@
 using namespace std;
 class FeatureStream
 {
+protected:
     vector<Features *> featuresList;
 public:
     FeatureStream();
-    FeatureStream(PCMStream &stream);
 
     void append(const FeatureStream &toAppend);
     void appendSingle(Features *toAppend);
