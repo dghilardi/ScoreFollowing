@@ -110,6 +110,7 @@ void OggDecoder::read_headers(istream& stream, ogg_sync_state* state) {
 OggDecoder::OggDecoder(string filename): mGranulepos(0), is(filename.c_str(), ios::in | ios::binary), audio(0){
     int ret = ogg_sync_init(&state);
     assert(ret==0);
+    alreadyReaden.num = 0;
 
     read_headers(is, &state);
 
@@ -139,11 +140,19 @@ OggDecoder::~OggDecoder(){
     is.close();
 }
 
-bool OggDecoder::readSingleFrame(float ***data, uint *samples){
+/**
+ * @brief OggDecoder::readNextFrame Read the next frame (usually 1024 frames but can be less)
+ * @param samples number of readen samples
+ * @param data samples
+ * @return false if the end of the stream is reached
+ */
+bool OggDecoder::readNextFrame(uint *samples, float ***data)
+{
     *samples = 0;
     int ret;
     ogg_packet packet;
-    if(read_packet(is, &state, audio, &packet)){
+    bool readStatus = read_packet(is, &state, audio, &packet);
+    if(readStatus){
         if(vorbis_synthesis(&audio->mVorbis.mBlock, &packet)==0){
             ret=vorbis_synthesis_blockin(&audio->mVorbis.mDsp, &audio->mVorbis.mBlock);
             assert(ret==0);
@@ -153,9 +162,42 @@ bool OggDecoder::readSingleFrame(float ***data, uint *samples){
 
         ret = vorbis_synthesis_read(&audio->mVorbis.mDsp, *samples);
         assert(ret == 0);
-        return true;
     }
-    return false;
+
+    return readStatus;
+}
+
+bool OggDecoder::readFixedFrame(float **data, uint *samples, uint frameSize){
+    float **tmpdata=NULL;
+    while(alreadyReaden.num<1024){
+        bool readOk = readNextFrame(samples, &tmpdata);
+        if(!readOk) return false;
+        if(*samples>0){
+            /*for(int i=0; i<*samples; ++i){
+                alreadyReaden.data[0][i] = (tmpdata)[0][i];
+                alreadyReaden.data[1][i] = (tmpdata)[1][i];
+            }*/
+            memcpy(&alreadyReaden.data[0][alreadyReaden.num], tmpdata[0], sizeof(float)*(*samples));
+            memcpy(&alreadyReaden.data[1][alreadyReaden.num], tmpdata[1], sizeof(float)*(*samples));
+            alreadyReaden.num += *samples;
+        }
+    }
+    *samples = 1024;
+    memcpy(data[0], alreadyReaden.data[0], sizeof(float)*1024);
+    memcpy(data[1], alreadyReaden.data[1], sizeof(float)*1024);
+    alreadyReaden.num -= 1024;
+    memcpy(alreadyReaden.data[0], alreadyReaden.data[0]+1024, sizeof(float)*alreadyReaden.num);
+    memcpy(alreadyReaden.data[1], alreadyReaden.data[1]+1024, sizeof(float)*alreadyReaden.num);
+    return true;
+}
+
+bool OggDecoder::readSingleFrame(float ***data, uint *samples){
+    //bool readStatus = readNextFrame(samples, data);
+    *data = new float*[2];
+    (*data)[0] = new float[1024];
+    (*data)[1] = new float[1024];
+    bool readStatus = readFixedFrame(*data, samples, 1024);
+    return readStatus;
 }
 
 int OggDecoder::getChannelNumber(){

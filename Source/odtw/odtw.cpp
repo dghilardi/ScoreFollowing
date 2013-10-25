@@ -233,3 +233,13 @@ void ODTW::printCheckSamples(){
         cout << "track: " << ((int)(pt.y*sampleToSecFactor))/60 <<":"<<setfill('0')<<setw(2)<< ((int)(pt.y*sampleToSecFactor))%60  << "\tinput: " << ((int)(pt.x*sampleToSecFactor))/60<<":"<<setfill('0')<<setw(2)<< ((int)(pt.x*sampleToSecFactor))%60 << endl;
     }
 }
+
+float ODTW::getTrackTime(float executionTime){
+    const float sampleToSecFactor = 1024/44100.0;
+    int sampleIndex = executionTime/sampleToSecFactor;
+
+    for(int i=0; i<path.size(); ++i){
+        if(path.at(i).x==sampleIndex) return path.at(i).y*sampleToSecFactor;
+    }
+    return -1;
+}

@@ -10,6 +10,7 @@
 #include <theora/theora.h>
 #include <theora/theoradec.h>
 #include <vorbis/codec.h>
+#include <cstring>
 
 #include "pcmstream.h"
 
@@ -96,6 +97,11 @@ public:
 
 typedef map<int, OggStream*> StreamMap;
 
+struct Samples{
+    float data[2][2048];
+    int num;
+};
+
 class OggDecoder : public PCMStream
 {
 public:
@@ -107,6 +113,8 @@ public:
   ifstream is;
   ogg_sync_state state;
   OggStream *audio;
+  Samples alreadyReaden;
+
 private:
   bool handle_theora_header(OggStream* stream, ogg_packet* packet);
   bool handle_vorbis_header(OggStream* stream, ogg_packet* packet);
@@ -115,6 +123,7 @@ private:
   bool read_page(istream& stream, ogg_sync_state* state, ogg_page* page);
   bool read_packet(istream& is, ogg_sync_state* state, OggStream* stream, ogg_packet* packet);
   void handle_theora_data(OggStream* stream, ogg_packet* packet);
+  bool readFixedFrame(float **data, uint *samples, uint frameSize);
 
 public:
   OggDecoder(string filename);
@@ -124,6 +133,7 @@ public:
   bool readSingleFrame(float ***data, uint *samples);
   int getChannelNumber();
   int getSampleRate();
+  bool readNextFrame(uint *samples, float ***data);
 };
 
 #endif // OGGDECODER_H

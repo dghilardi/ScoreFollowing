@@ -241,11 +241,11 @@ void Features::fillChromaVector(cvec_t *fft){
         double var = 0, m=0;
         for(int i=0; i<NBINS; ++i){
             chromaVector[i] = (chromaVector[i]-mean)/stddev;
-            cout << std::fixed << (chromaVector[i]>0?" ":"")<<chromaVector[i]<<"\t";
+            //cout << std::fixed << (chromaVector[i]>0?" ":"")<<chromaVector[i]<<"\t";
             var += pow(chromaVector[i], 2);
             m+=chromaVector[i];
         }
-        cout << endl;
+        //cout << endl;
         var=var/NBINS;
         m=m/NBINS;
         //cout << "Varianza: " << var << ", Media: " << m << endl;

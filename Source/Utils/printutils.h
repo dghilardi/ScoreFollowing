@@ -12,6 +12,7 @@ class PrintUtils
 public:
     PrintUtils();
     static void printPercentage(int status, int total);
+    static void printError(string errormsg);
     static void errNoOpenCV();
 };
 

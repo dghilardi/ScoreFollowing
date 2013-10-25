@@ -16,6 +16,7 @@
 #include "odtw/featureodtw.h"
 #include "Utils/printutils.h"
 #include "audioStream/Input/micinput.h"
+#include "Testing/accuracytest.h"
 
 #define ODTW_WINSIZE 500
 #define ODTW_MAXRUN 3
@@ -37,21 +38,26 @@ string testSet[] = {
     "../moonlight-mid.ogg", "../moonlight.ogg",                                           //5
     "../pagcap1a.ogg", "../pagcap1b.ogg",                                                 //6
     "../midpagcap1.ogg", "../pagcap1a.ogg",                                               //7
-    "../MAPS_MUS-alb_esp2_AkPnStgb-base.ogg", "../MAPS_MUS-alb_esp2_AkPnStgb-played.ogg"  //8
+    "../MAPS_MUS-alb_esp2_AkPnStgb-base.ogg", "../MAPS_MUS-alb_esp2_AkPnStgb-played.ogg", //8
+    "../MAPS/MAPS_MUS-waldstein_1_AkPnStgb-base.ogg", "../MAPS/MAPS_MUS-waldstein_1_AkPnStgb-played.ogg",
+    "../pambiche-.ogg", "../pambiche2.ogg",
+    "../pambiche-.ogg", "../pambiche_mod.ogg"
 };
 
 string midiTestSet[] = {
     "../MAPS_MUS-alb_esp2_AkPnStgb-base.mid", "../MAPS_MUS-alb_esp2_AkPnStgb-played.ogg",
     "../midpagcap1.mid", "../midpagcap1.ogg",
-    "../midpagcap1.mid", "../pagcap1a.ogg"
+    "../midpagcap1.mid", "../pagcap1a.ogg",
+    "../pambiche.midi", "../pambiche2.ogg"
 };
 
 int main(int argc, char* argv[])
 {
-    int testI = 2;
-    midiDTW(midiTestSet[2*testI], midiTestSet[2*testI+1], USEONLINEALGORITHM);
+    int testI = 9;
+    //midiDTW(midiTestSet[2*testI], midiTestSet[2*testI+1], USEONLINEALGORITHM|USEFEATURES);
     //dtwFiles(testSet[2*testI], testSet[2*testI+1], USEONLINEALGORITHM|USEFEATURES);
     //micODTW(testSet[2*testI]);
+    AccuracyTest::odtwTest();
     return 0;
 }
 
@@ -107,6 +113,8 @@ void dtwFiles(string trackPath, string inputPath, int flags){
         }
         PCMFeatureStream trackFeatures(trackDec);
         PCMFeatureStream inputFeatures(inputDec);
+
+        cout << "Track length: " <<trackFeatures.getLength()<<"(" <<trackDec.getSampleRate()<<") Execution length: "<< inputFeatures.getLength() << endl;
 
         FeatureODTW odtw(trackFeatures, ODTW_WINSIZE, ODTW_MAXRUN);
         int inputLength = inputFeatures.getLength();

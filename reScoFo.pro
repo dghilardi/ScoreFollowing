@@ -40,7 +40,8 @@ SOURCES += Source/main.cpp \
     Source/audioStream/Input/AudioBuffer.cpp \
     Source/audioStream/featureStream/pcmfeaturestream.cpp \
     Source/audioStream/featureStream/midifeaturestream.cpp \
-    Source/audioStream/featureStream/midifeatures.cpp
+    Source/audioStream/featureStream/midifeatures.cpp \
+    Source/Testing/accuracytest.cpp
 
 HEADERS += \
     Source/audioStream/ogg_stream.h \
@@ -65,7 +66,8 @@ HEADERS += \
     Source/audioStream/Input/AudioBuffer.h \
     Source/audioStream/featureStream/pcmfeaturestream.h \
     Source/audioStream/featureStream/midifeaturestream.h \
-    Source/audioStream/featureStream/midifeatures.h
+    Source/audioStream/featureStream/midifeatures.h \
+    Source/Testing/accuracytest.h
 
-LIBS += -lvorbis -lvorbisfile -lvorbisenc -laubioext -lportaudiocpp -lpthread -lportaudio
+LIBS += -lvorbis -lvorbisfile -lvorbisenc -laubioext -lportaudiocpp -lpthread -lportaudio -ljsoncpp
 

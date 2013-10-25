@@ -57,6 +57,7 @@ public:
     // void appendPitch(vector<int> newFrames);
     void printCheckSamples();
     void showROI(int trackbegin, int trackend, int inputbegin, int inputend);
+    float getTrackTime(float executionTime);
 };
 
 #endif // ODTW_H

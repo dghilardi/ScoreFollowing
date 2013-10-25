@@ -10,6 +10,7 @@ PCMFeatureStream::PCMFeatureStream(PCMStream &stream){
 
     bool cont=true;
     FeatureDetectors det(1024, 2);
+    int skipped=0;
     while(cont){
         cont = stream.readSingleFrame(&(frame.data),&(frame.length));
         frame.channels = channelNumber;
