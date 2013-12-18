@@ -3,6 +3,10 @@
 FeatureStream::FeatureStream(){
 }
 
+FeatureStream::~FeatureStream(){
+    //for(uint i=0; i<featuresList.size(); ++i) delete featuresList[i];
+}
+
 int FeatureStream::getLength(){
     return featuresList.size();
 }
@@ -26,4 +30,8 @@ void FeatureStream::append(const FeatureStream &toAppend){
 
 void FeatureStream::appendSingle(Features *toAppend){
     featuresList.push_back(toAppend);
+}
+
+void FeatureStream::showChromagram(){
+    Features::showChromagram(featuresList);
 }

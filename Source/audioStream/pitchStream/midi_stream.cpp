@@ -8,21 +8,9 @@ Midi_Stream::Midi_Stream(string filename){
     if(!fMidi.readFrom(midiStream)) throw string(ERROR_NO_FILE);
 
     fMidi.convertTimestampTicksToSeconds();
-    cout << fMidi.getTimeFormat() << endl;
-    short tformat = fMidi.getTimeFormat();
-    double normalizationFactor;
-    if(tformat<0){
-        short tpf = tformat & 0xFF;
-        short fps = (-tformat & 0xFF00)>>8;
-        int ticksPerSecond = tpf*fps;
-        normalizationFactor = 44100/(double)(ticksPerSecond*1024);
-        cout << "fps: " << fps << " tpf: " << tpf <<" norm-factor: "<<normalizationFactor<< endl;
-    }else{
-
-    }
-    //throw;
 
     length = fMidi.getLastTimestamp()*SCALE_FACTOR+1;
+    cout << fMidi.getLastTimestamp() << endl;
     //create map structure
     songMap = new bool*[length];
     for(int i=0; i<length; ++i) songMap[i] = new bool[NUM_MID_NOTES]();
@@ -36,11 +24,10 @@ Midi_Stream::Midi_Stream(string filename){
                 const MidiMessageSequence::MidiEventHolder *evtoff = evt->noteOffObject;
                 double begin = evt->message.getTimeStamp();
                 double end = evtoff->message.getTimeStamp();
-                cout << "begin: " << begin << " end: " << end << endl;
-                for(int k=begin; k<end; ++k){
-                    int fstidx = k*SCALE_FACTOR;
+                for(int k=begin*SCALE_FACTOR; k<end*SCALE_FACTOR; ++k){
+                    int fstidx = k;
                     int sndidx = evt->message.getNoteNumber();
-                    songMap[k*SCALE_FACTOR][evt->message.getNoteNumber()] = true;
+                    songMap[fstidx][evt->message.getNoteNumber()] = true;
                 }
             }
         }

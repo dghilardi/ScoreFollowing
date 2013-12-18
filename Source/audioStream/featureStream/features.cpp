@@ -10,7 +10,7 @@ Features::Features(fvec_t *frame, FeatureDetectors &det){
     cvec_t * fft       = new_cvec (win_s, numChannels); /* input buffer */
     fvec_t * out      = new_fvec (1, numChannels);     /* input buffer */
 
-    assert(win_s==1024);
+    assert(win_s==FRAME_SIZE);
 
     smpl_t curlevel = aubio_level_detection(frame, -90);
     isSilence = (curlevel==1.);
@@ -94,9 +94,12 @@ Features::Features(fvec_t *frame, FeatureDetectors &det){
          << "KL diverg: "    << klDivergence[0]
          << "mod KL: "       << modifiedKL[0] << endl;
     //cout << max << endl;*/
+    del_cvec(fft);
+    del_fvec(out);
 }
 
 Features::~Features(){
+    /*
     delete [] frameEnergy;
     delete [] highFreqContent;
     delete [] spectralFlux;
@@ -104,6 +107,7 @@ Features::~Features(){
     delete [] klDivergence;
     delete [] modifiedKL;
     delete [] complexDomain;
+    */
 }
 
 /**

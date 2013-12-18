@@ -149,8 +149,8 @@ void ODTW::showMatrix(){
     }
 
     const int numhlines = 10, numvlines = 10;
-    int trackSec = getTrackSize()*1024/44100;
-    int inputTime = getInputSize()*1024/44100;
+    int trackSec = getTrackSize()*FRAME_SIZE/44100;
+    int inputTime = getInputSize()*FRAME_SIZE/44100;
     for(int i=0; i<numhlines; ++i){
         cv::line(img, cv::Point(0, i*height/numhlines), cv::Point(width, i*height/numhlines), cv::Scalar(200));
         stringstream sstream;
@@ -185,10 +185,10 @@ void ODTW::showMatrix(){
 
 void ODTW::showROI(int trackbegin, int trackend, int inputbegin, int inputend){
 #ifdef USE_OPENCV
-    int beginTrackFrame = (trackbegin*44100)/1024;
-    int beginInputFrame = (inputbegin*44100)/1024;
-    int endTrackFrame = (trackend*44100)/1024;
-    int endInputFrame = (inputend*44100)/1024;
+    int beginTrackFrame = (trackbegin*44100)/FRAME_SIZE;
+    int beginInputFrame = (inputbegin*44100)/FRAME_SIZE;
+    int endTrackFrame = (trackend*44100)/FRAME_SIZE;
+    int endInputFrame = (inputend*44100)/FRAME_SIZE;
     cout << endTrackFrame-beginTrackFrame << "x" << endInputFrame-beginInputFrame << endl;
     cv::Mat img(endTrackFrame-beginTrackFrame, endInputFrame-beginInputFrame, CV_8UC1, cv::Scalar(128));
 
@@ -225,7 +225,7 @@ void ODTW::showROI(int trackbegin, int trackend, int inputbegin, int inputend){
 }
 
 void ODTW::printCheckSamples(){
-    const float sampleToSecFactor = 1024/44100.0;
+    const float sampleToSecFactor = FRAME_SIZE/44100.0;
 
     const int numSamples = 40;
     for(int i=0; i<numSamples; ++i){
@@ -235,7 +235,7 @@ void ODTW::printCheckSamples(){
 }
 
 float ODTW::getTrackTime(float executionTime){
-    const float sampleToSecFactor = 1024/44100.0;
+    const float sampleToSecFactor = FRAME_SIZE/44100.0;
     int sampleIndex = executionTime/sampleToSecFactor;
 
     for(int i=0; i<path.size(); ++i){

@@ -2,6 +2,7 @@
 #define PCMFEATURESTREAM_H
 #include "featurestream.h"
 #include "../pcmStream/pcmstream.h"
+#include "../pcmStream/oggdecoder.h"
 
 class PCMFeatureStream : public FeatureStream
 {

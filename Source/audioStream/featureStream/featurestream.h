@@ -14,12 +14,14 @@ protected:
     vector<Features *> featuresList;
 public:
     FeatureStream();
+    ~FeatureStream();
 
     void append(const FeatureStream &toAppend);
     void appendSingle(Features *toAppend);
     int getLength();
     Features *at(int i);
 
+    void showChromagram();
     static int getFeatureDistance(FeatureStream &listA, int indexA, FeatureStream &listB, int indexB);
 };
 

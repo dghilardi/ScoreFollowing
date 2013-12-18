@@ -1,6 +1,6 @@
 #include "accuracytest.h"
 
-#define ODTW_WINSIZE 500
+#define ODTW_WINSIZE 100
 #define ODTW_MAXRUN 3
 
 AccuracyTest::AccuracyTest()
@@ -9,7 +9,9 @@ AccuracyTest::AccuracyTest()
 
 void AccuracyTest::odtwTest(){
 
-    ifstream ifs("../mapsTests.json");
+    //ifstream ifs("../mapsTests.json");
+    ifstream ifs("../mapsTests-mid.json");
+    //ifstream ifs("../accuracyTest.json");
     string content((istreambuf_iterator<char>(ifs)), istreambuf_iterator<char>());
     Json::Value root;
     Json::Reader reader;
@@ -27,11 +29,20 @@ void AccuracyTest::odtwTest(){
         string trackPath = testInstances[i]["Track"].asString();
         string inputPath = testInstances[i]["Execution"].asString();
 
-        OggDecoder trackDec(trackPath);
+        string ext = trackPath.substr(trackPath.size()-4);
+        FeatureStream trackFeatures;
+        if(ext==string(".mid") || ext == string("midi")){
+            Midi_Stream midi(trackPath);
+            trackFeatures = MIDIFeatureStream(midi);
+        }else{
+            OggDecoder trackDec(trackPath);
+            trackFeatures = PCMFeatureStream(trackDec);
+        }
+
         OggDecoder inputDec(inputPath);
 
 
-        PCMFeatureStream trackFeatures(trackDec);
+        //PCMFeatureStream trackFeatures(trackDec);
         PCMFeatureStream inputFeatures(inputDec);
 
         FeatureODTW odtw(trackFeatures, ODTW_WINSIZE, ODTW_MAXRUN);
@@ -43,7 +54,7 @@ void AccuracyTest::odtwTest(){
 
         float totErr=0;
         if(testInstances[i]["CompletelyAligned"].asBool()){
-            const float samplesToSec = 1024/44100.0;
+            const float samplesToSec = FRAME_SIZE/44100.0;
             float maxErr=0;
             int endTime = inputFeatures.getLength()*samplesToSec;
             cout << "Track time: " << trackFeatures.getLength()*samplesToSec << "\tExecution time: " << endTime << endl;

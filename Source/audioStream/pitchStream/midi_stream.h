@@ -9,13 +9,13 @@
 #include "../../dtw.h"
 
 #include "../../Utils/printutils.h"
-
+#include "../../settings.h"
 #include "../../debugHeader.h"
 #include "pitchstream.h"
 
 #define ERROR_NO_FILE "Error! File not found"
 
-#define SCALE_FACTOR 43
+const double SCALE_FACTOR = 44100.0/FRAME_SIZE;
 
 using namespace std;
 class Midi_Stream : public PitchStream

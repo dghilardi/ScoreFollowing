@@ -80,26 +80,6 @@ void Ogg_Stream::display()
 
 
 
-bool Ogg_Stream::playback()
-{
-    if(playing())
-        return true;
-
-    if(!stream(buffers[0]))
-        return false;
-
-    if(!stream(buffers[1]))
-        return false;
-
-    alSourceQueueBuffers(source, 2, buffers);
-    alSourcePlay(source);
-
-    return true;
-}
-
-
-
-
 bool Ogg_Stream::playing()
 {
     ALenum state;
@@ -108,33 +88,6 @@ bool Ogg_Stream::playing()
 
     return (state == AL_PLAYING);
 }
-
-
-
-
-bool Ogg_Stream::update()
-{
-    int processed;
-    bool active = true;
-
-    alGetSourcei(source, AL_BUFFERS_PROCESSED, &processed);
-
-    while(processed--)
-    {
-        ALuint buffer;
-
-        alSourceUnqueueBuffers(source, 1, &buffer);
-        check();
-
-        active = stream(buffer);
-
-        alSourceQueueBuffers(source, 1, &buffer);
-        check();
-    }
-
-    return active;
-}
-
 
 
 
@@ -217,55 +170,7 @@ string Ogg_Stream::errorString(int code)
             return string("Unknown Ogg error.");
     }
 }
-/*
-bool Ogg_Stream::readSample(fvec_t *sample){
-    assert(sample->length==BUFFER_SIZE);
-    assert(sample->channels==vorbisInfo->channels);
 
-    char pcm[BUFFER_SIZE];
-    int  size = 0;
-    int  section;
-    int  result;
-
-    while(size < BUFFER_SIZE)
-    {
-        for(int i=0; i<sample->channels; ++i){
-            //result = ov_read(&oggStream, sample->data[i] + size, 8, 0, 2, 1, &section);
-            assert(result==8);
-        }
-        if(result > 0)
-            size += result;
-        else
-            if(result < 0)
-                throw errorString(result);
-            else
-                break;
-    }
-
-    if(size == 0)
-        return false;
-
-    //alBufferData(buffer, format, pcm, size, vorbisInfo->rate);
-    check();
-
-    return true;
-}
-*/
-bool Ogg_Stream::readHeader(ogg_packet &packet, fvec_t *dest){
-    int ret = vorbis_synthesis_headerin(vorbisInfo, vorbisComment, &packet);
-
-    if (prevRet == 1 && ret == OV_ENOTVORBIS) {
-        // First data packet
-        ret = vorbis_synthesis_init(&mDsp, vorbisInfo);
-        assert(ret == 0);
-        ret = vorbis_block_init(&mDsp, &mBlock);
-        assert(ret == 0);
-        getFrame(packet, dest);
-    }
-    else if (ret == 0) {
-        prevRet = 1;
-    }
-}
 
 bool Ogg_Stream::getFrame(ogg_packet &packet, fvec_t *dest){
     int ret = 0;

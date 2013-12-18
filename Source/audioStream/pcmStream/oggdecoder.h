@@ -12,6 +12,7 @@
 #include <vorbis/codec.h>
 #include <cstring>
 
+#include "../../settings.h"
 #include "pcmstream.h"
 
 //#include <SDL/SDL.h>
@@ -98,7 +99,7 @@ public:
 typedef map<int, OggStream*> StreamMap;
 
 struct Samples{
-    float data[2][2048];
+    float data[2][2*FRAME_SIZE];
     int num;
 };
 

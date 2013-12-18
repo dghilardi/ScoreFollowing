@@ -70,4 +70,3 @@ HEADERS += \
     Source/Testing/accuracytest.h
 
 LIBS += -lvorbis -lvorbisfile -lvorbisenc -laubioext -lportaudiocpp -lpthread -lportaudio -ljsoncpp
-
